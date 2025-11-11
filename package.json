@@ -1,0 +1,15 @@
+{
+  "name": "student-complaint-dashboard",
+  "version": "1.0.0",
+  "description": "Student Complaint Management System",
+  "scripts": {
+    "dev": "php -S localhost:8000 -t public",
+    "start": "php -S localhost:8000 -t public",
+    "serve": "php -S localhost:3000 -t public",
+    "setup": "node scripts/setup.js",
+    "check": "php test_connection.php"
+  },
+  "keywords": ["php", "student", "complaint", "dashboard"],
+  "author": "",
+  "license": "ISC"
+}
