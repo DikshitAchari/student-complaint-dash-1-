@@ -7,6 +7,7 @@ let users = [
     email: 'rahul.kumar@college.edu.in',
     password: 'password123',
     emailVerified: true,
+    role: 'student',
     department: 'Computer Science',
     year: '3rd Year',
     contact: '+91 98765 43210'
@@ -18,9 +19,22 @@ let users = [
     email: 'priya.sharma@college.edu.in',
     password: 'pass456',
     emailVerified: true,
+    role: 'student',
     department: 'Electronics',
     year: '2nd Year',
     contact: '+91 98765 43211'
+  }
+  ,{
+    id: 3,
+    fullName: 'Admin User',
+    usn: 'ADMIN01',
+    email: 'admin@college.edu.in',
+    password: 'admin123',
+    emailVerified: true,
+    role: 'admin',
+    department: '',
+    year: '',
+    contact: ''
   }
 ];
 
@@ -203,7 +217,12 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
     setTimeout(() => {
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
-      loadDashboard();
+      // Route based on role
+      if (currentUser.role === 'admin') {
+        showAdminDashboard();
+      } else {
+        loadDashboard();
+      }
     }, 500);
   } else {
     showToast('Invalid USN or password', 'error');
@@ -272,6 +291,7 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
     email,
     password,
     emailVerified: true,
+    role: document.getElementById('regRole') ? document.getElementById('regRole').value : 'student',
     department: '',
     year: '',
     contact: ''
@@ -711,6 +731,89 @@ function logout() {
 
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('active');
+}
+
+// --- Admin Portal Functions ---
+function showAdminDashboard() {
+  // Hide student sections and show admin dashboard
+  document.querySelectorAll('.content-section').forEach(section => {
+    section.style.display = 'none';
+  });
+  document.getElementById('adminDashboard').style.display = 'block';
+
+  // Update header
+  document.getElementById('headerUserName').textContent = currentUser.fullName;
+  document.getElementById('headerUserUsn').textContent = currentUser.usn;
+
+  // Load complaints for admin
+  loadAdminComplaints();
+}
+
+function loadAdminComplaints() {
+  const container = document.getElementById('adminComplaintsContainer');
+  if (!container) return;
+
+  if (complaints.length === 0) {
+    container.innerHTML = '<p style="color: var(--color-text-secondary);">No complaints submitted yet.</p>';
+    return;
+  }
+
+  // Render table
+  const rows = complaints.map(c => {
+    const adminComment = c.adminComments ? c.adminComments : '';
+    return `
+      <div class="complaint-card" style="margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <strong>${c.complaintId}</strong> — ${c.studentName} (${c.usn})
+            <div style="color: var(--color-text-secondary); font-size: 13px;">${c.location} • ${c.category} • ${formatDateTime(c.submittedAt)}</div>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <select onchange="changeComplaintStatus(${c.id}, this)" style="padding:6px; border-radius:6px;">
+              <option value="Open" ${c.status === 'Open' ? 'selected' : ''}>Open</option>
+              <option value="In Progress" ${c.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+              <option value="Resolved" ${c.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+              <option value="Closed" ${c.status === 'Closed' ? 'selected' : ''}>Closed</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <div style="margin-bottom:8px; color: var(--color-text-secondary);">${c.description}</div>
+          <textarea id="adminCommentInput-${c.id}" rows="2" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--color-border);">${adminComment}</textarea>
+          <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+            <button class="btn btn--outline btn--sm" onclick="viewComplaintDetails(${c.id})">View</button>
+            <button class="btn btn--primary btn--sm" onclick="saveAdminComment(${c.id})">Save Comment</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = rows;
+}
+
+function changeComplaintStatus(id, selectEl) {
+  const complaint = complaints.find(c => c.id === id);
+  if (!complaint) return;
+  const prev = complaint.status;
+  complaint.status = selectEl.value;
+  complaint.updatedAt = new Date().toISOString();
+  complaint.timeline.push({ event: `Status changed to ${complaint.status}`, timestamp: complaint.updatedAt });
+  showToast(`Status updated: ${prev} → ${complaint.status}`, 'success');
+  // refresh admin list
+  loadAdminComplaints();
+}
+
+function saveAdminComment(id) {
+  const input = document.getElementById(`adminCommentInput-${id}`);
+  if (!input) return;
+  const complaint = complaints.find(c => c.id === id);
+  if (!complaint) return;
+  complaint.adminComments = input.value.trim() || null;
+  complaint.updatedAt = new Date().toISOString();
+  complaint.timeline.push({ event: 'Admin commented', timestamp: complaint.updatedAt });
+  showToast('Admin comment saved', 'success');
+  loadAdminComplaints();
 }
 
 // Close modal when clicking outside

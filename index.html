@@ -62,7 +62,14 @@
                     <input type="text" id="regUsn" class="form-control" placeholder="e.g., 4NI21CS101" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Institutional Email</label>
+                    <label class="form-label">Register As</label>
+                    <select id="regRole" class="form-control" required>
+                        <option value="student">Student</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Enter Email</label>
                     <input type="email" id="regEmail" class="form-control" placeholder="your.email@gmail.com" required>
                 </div>
                 <div class="form-group">
@@ -348,6 +355,17 @@
     </div>
 
     <!-- Success Modal -->
+    <!-- Admin Dashboard (visible to admins only) -->
+    <div id="adminDashboard" class="content-section" style="display: none; padding: 24px;">
+        <h2>Admin Portal</h2>
+        <p>Manage all complaints submitted by students.</p>
+        <div class="admin-controls" style="margin-bottom: 16px;">
+            <button class="btn btn--outline" onclick="loadAdminComplaints()">Refresh</button>
+        </div>
+        <div id="adminComplaintsContainer" style="margin-top: 12px;">
+            <!-- Admin complaints table will be rendered here -->
+        </div>
+    </div>
     <div id="successModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
