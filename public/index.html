@@ -149,19 +149,23 @@
             <!-- Sidebar -->
             <aside class="sidebar" id="sidebar">
                 <nav class="sidebar-nav">
-                    <a href="#" class="nav-item active" onclick="showDashboardHome()">
+                    <a href="#" class="nav-item active" data-role="student" onclick="showDashboardHome()">
                         <span class="nav-icon">📊</span>
                         <span class="nav-text">Dashboard</span>
                     </a>
-                    <a href="#" class="nav-item" onclick="showNewComplaint()">
+                    <a href="#" class="nav-item" data-role="admin" onclick="showAdminDashboard()" style="display: none;">
+                        <span class="nav-icon">🛡️</span>
+                        <span class="nav-text">Admin Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-item" data-role="student" onclick="showNewComplaint()">
                         <span class="nav-icon">➕</span>
                         <span class="nav-text">New Complaint</span>
                     </a>
-                    <a href="#" class="nav-item" onclick="showMyComplaints()">
+                    <a href="#" class="nav-item" data-role="student" onclick="showMyComplaints()">
                         <span class="nav-icon">📋</span>
                         <span class="nav-text">My Complaints</span>
                     </a>
-                    <a href="#" class="nav-item" onclick="showProfile()">
+                    <a href="#" class="nav-item" data-role="student" onclick="showProfile()">
                         <span class="nav-icon">👤</span>
                         <span class="nav-text">Profile</span>
                     </a>
@@ -374,22 +378,60 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Admin Dashboard -->
+                <div id="adminDashboard" class="content-section" style="display: none;">
+                    <h2 style="margin-bottom: 24px;">Admin Dashboard</h2>
+                    
+                    <!-- Admin Stats -->
+                    <div class="stats-grid" style="margin-bottom: 32px;">
+                        <div class="stat-card" style="background-color: var(--color-bg-1);">
+                            <div class="stat-value" id="adminStatTotal">0</div>
+                            <div class="stat-label">Total Complaints</div>
+                        </div>
+                        <div class="stat-card" style="background-color: var(--color-bg-2);">
+                            <div class="stat-value" id="adminStatOpen">0</div>
+                            <div class="stat-label">Open Complaints</div>
+                        </div>
+                        <div class="stat-card" style="background-color: var(--color-bg-1);">
+                            <div class="stat-value" id="adminStatInProgress">0</div>
+                            <div class="stat-label">In Progress</div>
+                        </div>
+                        <div class="stat-card" style="background-color: var(--color-bg-3);">
+                            <div class="stat-value" id="adminStatResolved">0</div>
+                            <div class="stat-label">Resolved</div>
+                        </div>
+                    </div>
+
+                    <!-- Filter Section -->
+                    <div class="filters-section" style="margin-bottom: 20px;">
+                        <div class="filter-group">
+                            <label class="form-label">Status Filter</label>
+                            <select id="adminStatusFilter" class="form-control" onchange="filterAdminComplaints()">
+                                <option value="All">All</option>
+                                <option value="Open">Open</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Resolved">Resolved</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label">Search</label>
+                            <input type="text" id="adminSearchFilter" class="form-control" placeholder="Search by USN or Complaint ID" oninput="filterAdminComplaints()">
+                        </div>
+                    </div>
+
+                    <!-- All Complaints List -->
+                    <div>
+                        <h3 style="margin-bottom: 16px;">All Student Complaints</h3>
+                        <div id="adminComplaintsListContainer" class="complaints-list"></div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
 
     <!-- Success Modal -->
-    <!-- Admin Dashboard (visible to admins only) -->
-    <div id="adminDashboard" class="content-section" style="display: none; padding: 24px;">
-        <h2>Admin Portal</h2>
-        <p>Manage all complaints submitted by students.</p>
-        <div class="admin-controls" style="margin-bottom: 16px;">
-            <button class="btn btn--outline" onclick="loadAdminComplaints()">Refresh</button>
-        </div>
-        <div id="adminComplaintsContainer" style="margin-top: 12px;">
-            <!-- Admin complaints table will be rendered here -->
-        </div>
-    </div>
     <div id="successModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">

@@ -13,6 +13,7 @@ const API_ENDPOINTS = {
     UPDATE_STATUS: `${API_BASE_URL}/complaints/update_status.php`,
     UPDATE_ADMIN_COMMENTS: `${API_BASE_URL}/complaints/update_admin_comments.php`,
     GET_STATS: `${API_BASE_URL}/complaints/get_stats.php`,
+    GET_ALL_STATS: `${API_BASE_URL}/complaints/get_all_stats.php`,
     
     // User endpoints
     UPDATE_PROFILE: `${API_BASE_URL}/users/update_profile.php`,

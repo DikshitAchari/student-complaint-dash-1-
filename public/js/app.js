@@ -93,6 +93,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
       setTimeout(() => {
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
+        initializeDashboard();
         loadDashboard();
       }, 500);
     } else {
@@ -135,6 +136,7 @@ document.getElementById('adminLoginForm').addEventListener('submit', async funct
       setTimeout(() => {
         document.getElementById('adminLoginPage').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
+        initializeDashboard();
         showAdminDashboard();
       }, 500);
     } else {
@@ -228,6 +230,32 @@ document.getElementById('registerForm').addEventListener('submit', async functio
 });
 
 // Dashboard Functions
+function initializeDashboard() {
+  // Show/hide navigation items based on user role
+  const studentNavItems = document.querySelectorAll('.nav-item[data-role="student"]');
+  const adminNavItems = document.querySelectorAll('.nav-item[data-role="admin"]');
+  
+  if (currentUser.role === 'admin') {
+    // Hide student-specific nav items
+    studentNavItems.forEach(item => {
+      item.style.display = 'none';
+    });
+    // Show admin nav items
+    adminNavItems.forEach(item => {
+      item.style.display = 'flex';
+    });
+  } else {
+    // Show student nav items
+    studentNavItems.forEach(item => {
+      item.style.display = 'flex';
+    });
+    // Hide admin nav items
+    adminNavItems.forEach(item => {
+      item.style.display = 'none';
+    });
+  }
+}
+
 function loadDashboard() {
   document.getElementById('headerUserName').textContent = currentUser.fullName;
   document.getElementById('headerUserUsn').textContent = currentUser.usn;
@@ -745,74 +773,155 @@ function toggleSidebar() {
 
 // --- Admin Portal Functions ---
 function showAdminDashboard() {
-  // Hide student sections and show admin dashboard
+  // Hide all content sections
   document.querySelectorAll('.content-section').forEach(section => {
     section.style.display = 'none';
   });
   document.getElementById('adminDashboard').style.display = 'block';
 
+  // Update active nav
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  const adminNavItem = document.querySelector('.nav-item[data-role="admin"]');
+  if (adminNavItem) {
+    adminNavItem.classList.add('active');
+  }
+
   // Update header
   document.getElementById('headerUserName').textContent = currentUser.fullName;
   document.getElementById('headerUserUsn').textContent = currentUser.usn;
 
-  // Load complaints for admin
-  loadAdminComplaints();
+  // Load admin statistics and complaints
+  loadAdminStats();
+  loadAllComplaints();
 }
 
-function loadAdminComplaints() {
-  const container = document.getElementById('adminComplaintsContainer');
-  if (!container) return;
-
-  fetch(API_ENDPOINTS.GET_ALL_COMPLAINTS)
+function loadAdminStats() {
+  fetch(API_ENDPOINTS.GET_ALL_STATS)
     .then(response => response.json())
-    .then(data => {
-      const complaints = data.complaints || [];
-      
-      if (complaints.length === 0) {
-        container.innerHTML = '<p style="color: var(--color-text-secondary);">No complaints submitted yet.</p>';
-        return;
-      }
-
-      const rows = complaints.map(c => {
-        const adminComment = c.adminComments ? c.adminComments : '';
-        return `
-          <div class="complaint-card" style="margin-bottom:12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                <strong>${c.complaintId}</strong> — ${c.studentName} (${c.usn})
-                <div style="color: var(--color-text-secondary); font-size: 13px;">${c.location} • ${c.category} • ${formatDateTime(c.submittedAt)}</div>
-              </div>
-              <div style="display:flex; gap:8px; align-items:center;">
-                <select onchange="changeComplaintStatus(${c.id}, this)" style="padding:6px; border-radius:6px;">
-                  <option value="Open" ${c.status === 'Open' ? 'selected' : ''}>Open</option>
-                  <option value="In Progress" ${c.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-                  <option value="Resolved" ${c.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
-                  <option value="Closed" ${c.status === 'Closed' ? 'selected' : ''}>Closed</option>
-                </select>
-              </div>
-            </div>
-            <div style="margin-top:10px;">
-              <div style="margin-bottom:8px; color: var(--color-text-secondary);">${c.description}</div>
-              <textarea id="adminCommentInput-${c.id}" rows="2" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--color-border);">${adminComment}</textarea>
-              <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
-                <button class="btn btn--outline btn--sm" onclick="viewComplaintDetailsAdmin(${c.id})">View</button>
-                <button class="btn btn--primary btn--sm" onclick="saveAdminComment(${c.id})">Save Comment</button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      container.innerHTML = rows;
+    .then(stats => {
+      document.getElementById('adminStatTotal').textContent = stats.total || 0;
+      document.getElementById('adminStatOpen').textContent = stats.open || 0;
+      document.getElementById('adminStatInProgress').textContent = stats.in_progress || 0;
+      document.getElementById('adminStatResolved').textContent = stats.resolved || 0;
     })
     .catch(error => {
-      console.error('Error loading admin complaints:', error);
-      container.innerHTML = '<p style="color: var(--color-error);">Failed to load complaints</p>';
+      console.error('Error fetching admin stats:', error);
     });
 }
 
-function changeComplaintStatus(id, selectEl) {
-  const newStatus = selectEl.value;
+let allComplaintsData = [];
+
+function loadAllComplaints() {
+  fetch(API_ENDPOINTS.GET_ALL_COMPLAINTS)
+    .then(response => response.json())
+    .then(data => {
+      allComplaintsData = data.complaints || [];
+      filterAdminComplaints();
+    })
+    .catch(error => {
+      console.error('Error loading all complaints:', error);
+      showToast('Failed to load complaints', 'error');
+    });
+}
+
+function filterAdminComplaints() {
+  const statusFilter = document.getElementById('adminStatusFilter').value;
+  const searchFilter = document.getElementById('adminSearchFilter').value.toLowerCase();
+  
+  let filtered = allComplaintsData;
+  
+  if (statusFilter !== 'All') {
+    filtered = filtered.filter(c => c.status === statusFilter);
+  }
+  
+  if (searchFilter) {
+    filtered = filtered.filter(c => 
+      c.complaintId.toLowerCase().includes(searchFilter) ||
+      c.usn.toLowerCase().includes(searchFilter) ||
+      c.studentName.toLowerCase().includes(searchFilter)
+    );
+  }
+  
+  displayAdminComplaints(filtered);
+}
+
+function displayAdminComplaints(complaints) {
+  const container = document.getElementById('adminComplaintsListContainer');
+  
+  if (complaints.length === 0) {
+    container.innerHTML = '<p style="color: var(--color-text-secondary); text-align: center; padding: 40px;">No complaints found.</p>';
+    return;
+  }
+  
+  container.innerHTML = complaints.map(complaint => `
+    <div class="complaint-card" style="margin-bottom: 16px;">
+      <div class="complaint-header">
+        <div>
+          <span class="complaint-id">${complaint.complaintId}</span>
+          <span class="status-badge status-${complaint.status.toLowerCase().replace(' ', '-')}" style="margin-left: 12px;">${complaint.status}</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          ${complaint.status !== 'In Progress' ? `<button class="btn btn--outline btn--sm" onclick="updateComplaintStatus(${complaint.id}, 'In Progress')">Mark In-Process</button>` : ''}
+          ${complaint.status !== 'Resolved' ? `<button class="btn btn--primary btn--sm" onclick="updateComplaintStatus(${complaint.id}, 'Resolved')">Mark Resolved</button>` : ''}
+        </div>
+      </div>
+      
+      <div class="complaint-details" style="margin-top: 12px;">
+        <div class="detail-item">
+          <span class="detail-label">Student</span>
+          <span class="detail-value">${complaint.studentName}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">USN</span>
+          <span class="detail-value">${complaint.usn}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Room Number</span>
+          <span class="detail-value">${complaint.roomNumber}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Location</span>
+          <span class="detail-value">${complaint.location}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Category</span>
+          <span class="detail-value">${complaint.category}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Priority</span>
+          <span class="detail-value priority-${complaint.priority.toLowerCase()}">${complaint.priority}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Submitted</span>
+          <span class="detail-value">${formatDateTime(complaint.submittedAt)}</span>
+        </div>
+      </div>
+      
+      <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--color-border);">
+        <div class="detail-label" style="margin-bottom: 6px;">Description:</div>
+        <p style="color: var(--color-text-secondary); margin: 0;">${complaint.description}</p>
+      </div>
+      
+      ${complaint.adminComments ? `
+        <div style="margin-top: 12px; padding: 12px; background: var(--color-secondary); border-radius: var(--radius-base);">
+          <div class="detail-label" style="margin-bottom: 6px;">Admin Comments:</div>
+          <p style="color: var(--color-text-secondary); margin: 0;">${complaint.adminComments}</p>
+        </div>
+      ` : ''}
+      
+      <div style="margin-top: 12px;">
+        <button class="btn btn--outline btn--sm" onclick="viewComplaintDetailsAdmin(${complaint.id})">View Full Details</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateComplaintStatus(complaintId, newStatus) {
+  if (!confirm(`Are you sure you want to mark this complaint as "${newStatus}"?`)) {
+    return;
+  }
   
   fetch(API_ENDPOINTS.UPDATE_STATUS, {
     method: 'POST',
@@ -820,7 +929,7 @@ function changeComplaintStatus(id, selectEl) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      id: id,
+      id: complaintId,
       status: newStatus
     })
   })
@@ -828,42 +937,15 @@ function changeComplaintStatus(id, selectEl) {
   .then(data => {
     if (data.success) {
       showToast(`Status updated to ${newStatus}`, 'success');
-      loadAdminComplaints();
+      // Reload admin stats and complaints
+      loadAdminStats();
+      loadAllComplaints();
     } else {
       showToast(data.message || 'Failed to update status', 'error');
     }
   })
   .catch(error => {
     console.error('Error updating status:', error);
-    showToast('Failed to connect to server', 'error');
-  });
-}
-
-function saveAdminComment(id) {
-  const input = document.getElementById(`adminCommentInput-${id}`);
-  if (!input) return;
-  
-  fetch(API_ENDPOINTS.UPDATE_ADMIN_COMMENTS, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      id: id,
-      admin_comments: input.value.trim()
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      showToast('Admin comment saved', 'success');
-      loadAdminComplaints();
-    } else {
-      showToast(data.message || 'Failed to save comment', 'error');
-    }
-  })
-  .catch(error => {
-    console.error('Error saving comment:', error);
     showToast('Failed to connect to server', 'error');
   });
 }
