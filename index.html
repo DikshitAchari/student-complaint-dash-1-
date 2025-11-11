@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Complaint Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Login Page -->
+    <div id="loginPage" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Student Complaint System</h1>
+                <p>Login to submit and track your complaints</p>
+            </div>
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label class="form-label">USN (University Seat Number)</label>
+                    <input type="text" id="loginUsn" class="form-control" placeholder="e.g., 4NI21CS101" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')">
+                            <span class="eye-icon">👁️</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberMe">
+                        <span>Remember Me</span>
+                    </label>
+                </div>
+                <button type="submit" class="btn btn--primary btn--full-width">Login</button>
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="#" onclick="showRegister()">Register here</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Registration Page -->
+    <div id="registerPage" class="auth-container" style="display: none;">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Student Registration</h1>
+                <p>Create your account to get started</p>
+            </div>
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="regFullName" class="form-control" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">USN (University Seat Number)</label>
+                    <input type="text" id="regUsn" class="form-control" placeholder="e.g., 4NI21CS101" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Institutional Email</label>
+                    <input type="email" id="regEmail" class="form-control" placeholder="your.email@gmail.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="regPassword" class="form-control" placeholder="Minimum 8 characters" required minlength="8">
+                        <button type="button" class="password-toggle" onclick="togglePassword('regPassword')">
+                            <span class="eye-icon">👁️</span>
+                        </button>
+                    </div>
+                    <div class="password-strength" id="passwordStrength"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" id="regConfirmPassword" class="form-control" placeholder="Re-enter your password" required>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="termsCheckbox" required>
+                        <span>I agree to the Terms and Conditions</span>
+                    </label>
+                </div>
+                <button type="submit" id="registerBtn" class="btn btn--primary btn--full-width">Register</button>
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="#" onclick="showLogin()">Login here</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="dashboard" style="display: none;">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <h1>Student Complaint Dashboard</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span class="user-name" id="headerUserName"></span>
+                    <span class="user-usn" id="headerUserUsn"></span>
+                </div>
+                <button class="btn btn--outline btn--sm" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <div class="dashboard-body">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <nav class="sidebar-nav">
+                    <a href="#" class="nav-item active" onclick="showDashboardHome()">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="showNewComplaint()">
+                        <span class="nav-icon">➕</span>
+                        <span class="nav-text">New Complaint</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="showMyComplaints()">
+                        <span class="nav-icon">📋</span>
+                        <span class="nav-text">My Complaints</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="showProfile()">
+                        <span class="nav-icon">👤</span>
+                        <span class="nav-text">Profile</span>
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Dashboard Home View -->
+                <div id="dashboardHome" class="content-section">
+                    <h2>Dashboard Overview</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card" style="background-color: var(--color-bg-1);">
+                            <div class="stat-value" id="statTotal">0</div>
+                            <div class="stat-label">Total Complaints</div>
+                        </div>
+                        <div class="stat-card" style="background-color: var(--color-bg-2);">
+                            <div class="stat-value" id="statOpen">0</div>
+                            <div class="stat-label">Open Complaints</div>
+                        </div>
+                        <div class="stat-card" style="background-color: var(--color-bg-1);">
+                            <div class="stat-value" id="statInProgress">0</div>
+                            <div class="stat-label">In Progress</div>
+                        </div>
+                        <div class="stat-card" style="background-color: var(--color-bg-3);">
+                            <div class="stat-value" id="statResolved">0</div>
+                            <div class="stat-label">Resolved</div>
+                        </div>
+                    </div>
+                    <div class="recent-complaints">
+                        <h3>Recent Complaints</h3>
+                        <div id="recentComplaintsList"></div>
+                    </div>
+                </div>
+
+                <!-- New Complaint View -->
+                <div id="newComplaint" class="content-section" style="display: none;">
+                    <h2>Submit New Complaint</h2>
+                    <form id="complaintForm" class="complaint-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Room Number</label>
+                                <input type="text" id="roomNumber" class="form-control" placeholder="e.g., A-305 or N/A" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Location/Place</label>
+                                <select id="location" class="form-control" required>
+                                    <option value="">Select Location</option>
+                                    <option value="Hostel Block A">Hostel Block A</option>
+                                    <option value="Hostel Block B">Hostel Block B</option>
+                                    <option value="Hostel Block C">Hostel Block C</option>
+                                    <option value="Classroom Building">Classroom Building</option>
+                                    <option value="Library">Library</option>
+                                    <option value="Cafeteria">Cafeteria</option>
+                                    <option value="Sports Complex">Sports Complex</option>
+                                    <option value="Laboratory">Laboratory</option>
+                                    <option value="Administrative Block">Administrative Block</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Problem Category</label>
+                                <select id="category" class="form-control" required>
+                                    <option value="">Select Category</option>
+                                    <option value="Electrical Issue">Electrical Issue</option>
+                                    <option value="Plumbing/Water">Plumbing/Water</option>
+                                    <option value="Furniture Damage">Furniture Damage</option>
+                                    <option value="Cleanliness">Cleanliness</option>
+                                    <option value="Internet/WiFi">Internet/WiFi</option>
+                                    <option value="AC/Heating">AC/Heating</option>
+                                    <option value="Security">Security</option>
+                                    <option value="Pest Control">Pest Control</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Priority Level</label>
+                                <select id="priority" class="form-control" required>
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                    <option value="Urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Problem Description</label>
+                            <textarea id="description" class="form-control" rows="5" maxlength="500" placeholder="Describe the problem in detail..." required></textarea>
+                            <div class="char-count"><span id="charCount">0</span>/500</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Upload Photos (Optional)</label>
+                            <div class="photo-upload-area" id="photoUploadArea" onclick="document.getElementById('photoInput').click()">
+                                <div class="upload-placeholder">
+                                    <span class="upload-icon">📷</span>
+                                    <p>Click to upload or drag and drop</p>
+                                    <p class="upload-hint">JPG, PNG (Max 5MB per image, up to 3 images)</p>
+                                </div>
+                            </div>
+                            <input type="file" id="photoInput" accept="image/jpeg,image/png" multiple style="display: none;" onchange="handlePhotoUpload(event)">
+                            <div id="photoPreviewContainer" class="photo-preview-container"></div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn--outline" onclick="clearComplaintForm()">Clear Form</button>
+                            <button type="submit" class="btn btn--primary">Submit Complaint</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- My Complaints View -->
+                <div id="myComplaints" class="content-section" style="display: none;">
+                    <h2>My Complaints</h2>
+                    <div class="filters-section">
+                        <div class="filter-group">
+                            <label class="form-label">Status</label>
+                            <select id="statusFilter" class="form-control" onchange="filterComplaints()">
+                                <option value="All">All</option>
+                                <option value="Open">Open</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Resolved">Resolved</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label">Search</label>
+                            <input type="text" id="searchFilter" class="form-control" placeholder="Search by ID or Room Number" oninput="filterComplaints()">
+                        </div>
+                    </div>
+                    <div id="complaintsListContainer" class="complaints-list"></div>
+                </div>
+
+                <!-- Profile View -->
+                <div id="profile" class="content-section" style="display: none;">
+                    <h2>My Profile</h2>
+                    <div class="profile-container">
+                        <div class="profile-card">
+                            <div class="profile-header">
+                                <div class="profile-avatar">👤</div>
+                                <div class="profile-info">
+                                    <h3 id="profileName"></h3>
+                                    <p id="profileUsn"></p>
+                                </div>
+                            </div>
+                            <form id="profileForm" class="profile-form">
+                                <div class="form-group">
+                                    <label class="form-label">Full Name</label>
+                                    <input type="text" id="profileFullName" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">USN</label>
+                                    <input type="text" id="profileUsnInput" class="form-control" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" id="profileEmail" class="form-control" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Contact Number</label>
+                                    <input type="tel" id="profileContact" class="form-control" placeholder="+91 XXXXX XXXXX">
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Department</label>
+                                        <input type="text" id="profileDepartment" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Year/Semester</label>
+                                        <input type="text" id="profileYear" class="form-control">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn--primary">Update Profile</button>
+                            </form>
+                        </div>
+                        <div class="profile-card">
+                            <h3>Change Password</h3>
+                            <form id="changePasswordForm" class="profile-form">
+                                <div class="form-group">
+                                    <label class="form-label">Current Password</label>
+                                    <input type="password" id="currentPassword" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">New Password</label>
+                                    <input type="password" id="newPassword" class="form-control" minlength="8" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Confirm New Password</label>
+                                    <input type="password" id="confirmNewPassword" class="form-control" required>
+                                </div>
+                                <button type="submit" class="btn btn--primary">Update Password</button>
+                            </form>
+                        </div>
+                        <div class="profile-card">
+                            <h3>Statistics</h3>
+                            <div class="profile-stats">
+                                <div class="profile-stat">
+                                    <div class="profile-stat-value" id="profileStatTotal">0</div>
+                                    <div class="profile-stat-label">Total Complaints</div>
+                                </div>
+                                <div class="profile-stat">
+                                    <div class="profile-stat-value" id="profileStatResolved">0</div>
+                                    <div class="profile-stat-label">Resolved</div>
+                                </div>
+                                <div class="profile-stat">
+                                    <div class="profile-stat-value" id="profileStatPending">0</div>
+                                    <div class="profile-stat-label">Pending</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✓ Complaint Submitted Successfully</h3>
+            </div>
+            <div class="modal-body">
+                <p>Your complaint has been registered with the following ID:</p>
+                <div class="complaint-id-display" id="generatedComplaintId"></div>
+                <p>You can track the status of your complaint in the "My Complaints" section.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--outline" onclick="closeSuccessModal()">Close</button>
+                <button class="btn btn--primary" onclick="viewMyComplaints()">View My Complaints</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Complaint Details Modal -->
+    <div id="detailsModal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Complaint Details</h3>
+                <button class="modal-close" onclick="closeDetailsModal()">×</button>
+            </div>
+            <div class="modal-body" id="detailsModalBody"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
