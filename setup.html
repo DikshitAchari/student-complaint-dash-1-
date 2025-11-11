@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Setup - Student Complaint Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .step {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .step h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .step p {
+            color: #555;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        .code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background: #5568d3;
+        }
+        .credentials {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+        .credentials h3 {
+            color: #0056b3;
+            margin-bottom: 10px;
+        }
+        .cred-item {
+            background: white;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .cred-label {
+            font-weight: 600;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Database Setup Guide</h1>
+        <p class="subtitle">Follow these steps to set up your Student Complaint Dashboard</p>
+
+        <div class="step">
+            <h3>Step 1: Start XAMPP</h3>
+            <p>Open XAMPP Control Panel and start <strong>Apache</strong> and <strong>MySQL</strong> services.</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Access phpMyAdmin</h3>
+            <p>Open your browser and navigate to:</p>
+            <div class="code">http://localhost/phpmyadmin</div>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Create Database</h3>
+            <p>1. Click on <strong>"New"</strong> in the left sidebar<br>
+               2. Enter database name: <strong>student_complaints_db</strong><br>
+               3. Click <strong>"Create"</strong></p>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Run SQL Script</h3>
+            <p>1. Click on the newly created <strong>student_complaints_db</strong><br>
+               2. Go to the <strong>"SQL"</strong> tab<br>
+               3. Open this file: <strong>backend/database/schema.sql</strong><br>
+               4. Copy all contents and paste into the SQL box<br>
+               5. Click <strong>"Go"</strong></p>
+        </div>
+
+        <div class="step success">
+            <h3>✅ Setup Complete!</h3>
+            <p>Your database is now ready. You can access the application at:</p>
+            <div class="code">http://localhost/student-complaint-dash%20(1)/public/index.html</div>
+        </div>
+
+        <div class="credentials">
+            <h3>🔑 Default Login Credentials</h3>
+            
+            <div class="cred-item">
+                <div class="cred-label">Admin Account:</div>
+                USN: <strong>ADMIN01</strong><br>
+                Password: <strong>admin123</strong>
+            </div>
+
+            <div class="cred-item">
+                <div class="cred-label">Student Account 1:</div>
+                USN: <strong>4NI21CS101</strong><br>
+                Password: <strong>password123</strong>
+            </div>
+
+            <div class="cred-item">
+                <div class="cred-label">Student Account 2:</div>
+                USN: <strong>4NI21EC045</strong><br>
+                Password: <strong>password123</strong>
+            </div>
+        </div>
+
+        <div class="step warning">
+            <h3>⚠️ Important Notes</h3>
+            <p>• Make sure XAMPP services are running before accessing the application<br>
+               • Default MySQL username is <strong>root</strong> with <strong>no password</strong><br>
+               • If you have a different password, update <strong>backend/config/database.php</strong></p>
+        </div>
+
+        <a href="public/index.html" class="btn">Launch Application →</a>
+    </div>
+</body>
+</html>
