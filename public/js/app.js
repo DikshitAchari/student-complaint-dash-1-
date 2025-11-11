@@ -36,12 +36,24 @@ function generateComplaintId() {
 
 // Authentication Functions
 function showLogin() {
+  showStudentLogin();
+}
+
+function showStudentLogin() {
   document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('adminLoginPage').style.display = 'none';
+  document.getElementById('registerPage').style.display = 'none';
+}
+
+function showAdminLogin() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('adminLoginPage').style.display = 'flex';
   document.getElementById('registerPage').style.display = 'none';
 }
 
 function showRegister() {
   document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('adminLoginPage').style.display = 'none';
   document.getElementById('registerPage').style.display = 'flex';
 }
 
@@ -50,7 +62,7 @@ function togglePassword(inputId) {
   input.type = input.type === 'password' ? 'text' : 'password';
 }
 
-// Login Form Handler
+// Student Login Form Handler
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   const usn = document.getElementById('loginUsn').value.trim();
@@ -62,12 +74,18 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ usn, password })
+      body: JSON.stringify({ usn, password, loginType: 'student' })
     });
 
     const data = await response.json();
 
     if (data.success) {
+      // Prevent admin from logging in through student portal
+      if (data.user.role === 'admin') {
+        showToast('Admin accounts cannot login through student portal. Use admin login.', 'error');
+        return;
+      }
+      
       currentUser = data.user;
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
       
@@ -75,18 +93,55 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
       setTimeout(() => {
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
-        
-        if (currentUser.role === 'admin') {
-          showAdminDashboard();
-        } else {
-          loadDashboard();
-        }
+        loadDashboard();
       }, 500);
     } else {
       showToast(data.message || 'Invalid USN or password', 'error');
     }
   } catch (error) {
     console.error('Login error:', error);
+    showToast('Failed to connect to server', 'error');
+  }
+});
+
+// Admin Login Form Handler
+document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const usn = document.getElementById('adminLoginUsn').value.trim();
+  const password = document.getElementById('adminLoginPassword').value;
+
+  try {
+    const response = await fetch(API_ENDPOINTS.LOGIN, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ usn, password, loginType: 'admin' })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      // Only allow admin accounts
+      if (data.user.role !== 'admin') {
+        showToast('Invalid admin credentials', 'error');
+        return;
+      }
+      
+      currentUser = data.user;
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      
+      showToast('Admin login successful!', 'success');
+      setTimeout(() => {
+        document.getElementById('adminLoginPage').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        showAdminDashboard();
+      }, 500);
+    } else {
+      showToast(data.message || 'Invalid admin credentials', 'error');
+    }
+  } catch (error) {
+    console.error('Admin login error:', error);
     showToast('Failed to connect to server', 'error');
   }
 });
@@ -125,7 +180,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
   const password = document.getElementById('regPassword').value;
   const confirmPassword = document.getElementById('regConfirmPassword').value;
   const termsAccepted = document.getElementById('termsCheckbox').checked;
-  const role = document.getElementById('regRole') ? document.getElementById('regRole').value : 'student';
+  const role = 'student'; // Force student role only
 
   if (!termsAccepted) {
     showToast('Please accept the terms and conditions', 'error');

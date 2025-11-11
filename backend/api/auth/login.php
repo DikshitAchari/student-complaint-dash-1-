@@ -13,8 +13,22 @@ $data = json_decode(file_get_contents("php://input"));
 if(!empty($data->usn) && !empty($data->password)) {
     $user->usn = $data->usn;
     $user->password = $data->password;
+    $loginType = isset($data->loginType) ? $data->loginType : 'student';
 
     if($user->login()) {
+        // Validate login type matches user role
+        if($loginType === 'admin' && $user->role !== 'admin') {
+            http_response_code(401);
+            echo json_encode(array("success" => false, "message" => "Invalid admin credentials"));
+            exit();
+        }
+        
+        if($loginType === 'student' && $user->role === 'admin') {
+            http_response_code(401);
+            echo json_encode(array("success" => false, "message" => "Admin accounts cannot login through student portal"));
+            exit();
+        }
+        
         http_response_code(200);
         echo json_encode(array(
             "success" => true,

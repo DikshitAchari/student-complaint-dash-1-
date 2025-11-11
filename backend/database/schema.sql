@@ -53,11 +53,29 @@ CREATE TABLE IF NOT EXISTS complaint_timeline (
     INDEX idx_complaint_id (complaint_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert default admin user
+-- Insert default admin user (ONLY ONE ADMIN ALLOWED)
+-- Admin USN: ADMIN01
+-- Admin Password: admin123
 INSERT INTO users (full_name, usn, email, password, role) 
-VALUES ('Admin User', 'ADMIN01', 'admin@college.edu.in', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin')
+VALUES ('System Administrator', 'ADMIN01', 'admin@college.edu.in', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin')
 ON DUPLICATE KEY UPDATE usn = usn;
--- Default password is 'admin123'
+
+-- Prevent multiple admin accounts with a check constraint
+DELIMITER $$
+CREATE TRIGGER prevent_multiple_admins
+BEFORE INSERT ON users
+FOR EACH ROW
+BEGIN
+    DECLARE admin_count INT;
+    IF NEW.role = 'admin' THEN
+        SELECT COUNT(*) INTO admin_count FROM users WHERE role = 'admin';
+        IF admin_count >= 1 THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Only one admin account is allowed';
+        END IF;
+    END IF;
+END$$
+DELIMITER ;
 
 -- Insert sample student users
 INSERT INTO users (full_name, usn, email, password, role, department, year, contact) 

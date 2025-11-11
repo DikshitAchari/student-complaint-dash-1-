@@ -10,12 +10,12 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
-    <!-- Login Page -->
+    <!-- Student Login Page -->
     <div id="loginPage" class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
-                <h1>Student Complaint System</h1>
-                <p>Login to submit and track your complaints</p>
+                <h1 onclick="showAdminLogin()" style="cursor: pointer;">Student Complaint System</h1>
+                <p>Student Login - Submit and track your complaints</p>
             </div>
             <form id="loginForm" class="auth-form">
                 <div class="form-group">
@@ -37,9 +37,39 @@
                         <span>Remember Me</span>
                     </label>
                 </div>
-                <button type="submit" class="btn btn--primary btn--full-width">Login</button>
+                <button type="submit" class="btn btn--primary btn--full-width">Student Login</button>
                 <div class="auth-footer">
                     <p>Don't have an account? <a href="#" onclick="showRegister()">Register here</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Login Page -->
+    <div id="adminLoginPage" class="auth-container" style="display: none;">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1 onclick="showStudentLogin()" style="cursor: pointer;">Student Complaint System</h1>
+                <p style="color: #ff6b6b; font-weight: 600;">🔐 Admin Portal Access</p>
+            </div>
+            <form id="adminLoginForm" class="auth-form">
+                <div class="form-group">
+                    <label class="form-label">Admin Username</label>
+                    <input type="text" id="adminLoginUsn" class="form-control" placeholder="Enter admin username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Admin Password</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="adminLoginPassword" class="form-control" placeholder="Enter admin password" required autocomplete="current-password">
+                        <button type="button" class="password-toggle" onclick="togglePassword('adminLoginPassword')">
+                            <span class="eye-icon">👁️</span>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn--primary btn--full-width" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">Admin Login</button>
+                <div class="auth-footer">
+                    <p><a href="#" onclick="showStudentLogin()">← Back to Student Login</a></p>
+                    <p style="margin-top: 12px; font-size: 11px; color: #999;">Default: ADMIN01 / admin123</p>
                 </div>
             </form>
         </div>
@@ -61,13 +91,7 @@
                     <label class="form-label">USN (University Seat Number)</label>
                     <input type="text" id="regUsn" class="form-control" placeholder="e.g., 4NI21CS101" required>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Register As</label>
-                    <select id="regRole" class="form-control" required>
-                        <option value="student">Student</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                </div>
+
                 <div class="form-group">
                     <label class="form-label">Enter Email</label>
                     <input type="email" id="regEmail" class="form-control" placeholder="your.email@gmail.com" required>

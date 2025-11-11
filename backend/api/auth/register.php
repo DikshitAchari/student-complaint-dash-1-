@@ -21,7 +21,7 @@ if(
     $user->usn = $data->usn;
     $user->email = $data->email;
     $user->password = $data->password;
-    $user->role = $data->role;
+    $user->role = 'student'; // Force student role - admin registration not allowed
     $user->department = $data->department ?? '';
     $user->year = $data->year ?? '';
     $user->contact = $data->contact ?? '';

@@ -986,6 +986,38 @@ textarea.form-control {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-teal-700) 100%);
 }
 
+/* Admin Login - Different styling */
+#adminLoginPage.auth-container {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+}
+
+#adminLoginPage.auth-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+  z-index: 0;
+}
+
+#adminLoginPage .auth-card {
+  position: relative;
+  z-index: 1;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.auth-header h1 {
+  transition: transform 0.2s ease;
+}
+
+.auth-header h1:hover {
+  transform: scale(1.02);
+}
+
 .auth-card {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
