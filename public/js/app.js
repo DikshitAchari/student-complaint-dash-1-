@@ -259,6 +259,13 @@ function initializeDashboard() {
 function loadDashboard() {
   document.getElementById('headerUserName').textContent = currentUser.fullName;
   document.getElementById('headerUserUsn').textContent = currentUser.usn;
+  
+  // Set header title based on user role
+  const headerTitle = document.querySelector('.dashboard-header h1');
+  if (headerTitle) {
+    headerTitle.textContent = currentUser.role === 'admin' ? 'Admin Dashboard' : 'Student Complaint Dashboard';
+  }
+  
   showDashboardHome();
 }
 
@@ -274,6 +281,12 @@ function showDashboardHome() {
     item.classList.remove('active');
   });
   document.querySelectorAll('.nav-item')[0].classList.add('active');
+  
+  // Update header title for student
+  const headerTitle = document.querySelector('.dashboard-header h1');
+  if (headerTitle) {
+    headerTitle.textContent = 'Student Complaint Dashboard';
+  }
   
   // Update statistics
   updateDashboardStats();
@@ -788,7 +801,11 @@ function showAdminDashboard() {
     adminNavItem.classList.add('active');
   }
 
-  // Update header
+  // Update header for admin
+  const headerTitle = document.querySelector('.dashboard-header h1');
+  if (headerTitle) {
+    headerTitle.textContent = 'Admin Dashboard';
+  }
   document.getElementById('headerUserName').textContent = currentUser.fullName;
   document.getElementById('headerUserUsn').textContent = currentUser.usn;
 
