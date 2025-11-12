@@ -1129,3 +1129,35 @@ window.addEventListener('click', function(e) {
     e.target.style.display = 'none';
   }
 });
+
+// Session Restoration - Check if user is already logged in on page load
+window.addEventListener('DOMContentLoaded', function() {
+  if (currentUser && currentUser.id) {
+    console.log('Restoring session for user:', currentUser.fullName);
+    
+    // Hide all login pages
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('adminLoginPage').style.display = 'none';
+    document.getElementById('registerPage').style.display = 'none';
+    
+    // Show dashboard
+    document.getElementById('dashboard').style.display = 'block';
+    
+    // Initialize dashboard based on user role
+    initializeDashboard();
+    
+    if (currentUser.role === 'admin') {
+      // Restore admin dashboard
+      showAdminDashboard();
+    } else {
+      // Restore student dashboard
+      loadDashboard();
+    }
+    
+    showToast('Welcome back, ' + currentUser.fullName + '!', 'success');
+  } else {
+    // No session found, show login page
+    console.log('No active session found');
+    document.getElementById('loginPage').style.display = 'flex';
+  }
+});

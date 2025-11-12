@@ -1,4 +1,8 @@
 :root {
+  /* Background Images */
+  --auth-bg-image: url('../assets/images/col1.avif');
+  --admin-auth-bg-image: url('../assets/images/col1.avif');
+  
   /* Primitive Color Tokens */
   --color-white: rgba(255, 255, 255, 1);
   --color-black: rgba(0, 0, 0, 1);
@@ -984,6 +988,28 @@ textarea.form-control {
   justify-content: center;
   padding: var(--space-24);
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-teal-700) 100%);
+  position: relative;
+}
+
+/* Background image overlay support */
+.auth-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--auth-bg-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.3;
+  z-index: 0;
+}
+
+.auth-container .auth-card {
+  position: relative;
+  z-index: 1;
 }
 
 /* Admin Login - Different styling */
@@ -999,7 +1025,11 @@ textarea.form-control {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+  background-image: var(--admin-auth-bg-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.2;
   z-index: 0;
 }
 
