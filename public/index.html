@@ -69,7 +69,7 @@
                 <button type="submit" class="btn btn--primary btn--full-width" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">Admin Login</button>
                 <div class="auth-footer">
                     <p><a href="#" onclick="showStudentLogin()">← Back to Student Login</a></p>
-                    <p style="margin-top: 12px; font-size: 11px; color: #999;">Default: ADMIN01 / admin123</p>
+            
                 </div>
             </form>
         </div>
@@ -381,7 +381,12 @@
 
                 <!-- Admin Dashboard -->
                 <div id="adminDashboard" class="content-section" style="display: none;">
-                    <h2 style="margin-bottom: 24px;">Admin Dashboard</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h2 style="margin: 0;">Admin Dashboard</h2>
+                        <button class="btn btn--outline btn--sm" onclick="refreshAdminDashboard()">
+                            <span style="margin-right: 6px;">🔄</span> Refresh
+                        </button>
+                    </div>
                     
                     <!-- Admin Stats -->
                     <div class="stats-grid" style="margin-bottom: 32px;">

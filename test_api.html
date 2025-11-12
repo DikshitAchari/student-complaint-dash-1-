@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Admin Stats API</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .result { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background: #45a049; }
+        pre { background: #333; color: #0f0; padding: 10px; overflow: auto; }
+    </style>
+</head>
+<body>
+    <h1>Test Admin Stats API Endpoint</h1>
+    
+    <button onclick="testAPI()">Test API Call</button>
+    <button onclick="location.reload()">Refresh Page</button>
+    
+    <div id="result"></div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost/student-complaint-dash%20(1)/backend/api';
+        const GET_ALL_STATS_URL = `${API_BASE_URL}/complaints/get_all_stats.php`;
+        
+        function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Loading...</p>';
+            
+            console.log('Testing URL:', GET_ALL_STATS_URL);
+            
+            fetch(GET_ALL_STATS_URL)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                    
+                    resultDiv.innerHTML += `<div class="result"><strong>Status:</strong> ${response.status}</div>`;
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    console.log('Raw response:', text);
+                    resultDiv.innerHTML += `<div class="result"><strong>Raw Response:</strong><pre>${text}</pre></div>`;
+                    
+                    try {
+                        const data = JSON.parse(text);
+                        console.log('Parsed data:', data);
+                        resultDiv.innerHTML += `<div class="result"><strong>Parsed JSON:</strong><pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                        resultDiv.innerHTML += `
+                            <div class="result">
+                                <strong>Statistics:</strong><br>
+                                Total: ${data.total}<br>
+                                Open: ${data.open}<br>
+                                In Progress: ${data.in_progress}<br>
+                                Resolved: ${data.resolved}
+                            </div>
+                        `;
+                    } catch (e) {
+                        resultDiv.innerHTML += `<div class="result" style="background: #ffcccc;"><strong>JSON Parse Error:</strong> ${e.message}</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    resultDiv.innerHTML += `<div class="result" style="background: #ffcccc;"><strong>Error:</strong> ${error.message}</div>`;
+                });
+        }
+        
+        // Auto-run on page load
+        window.onload = testAPI;
+    </script>
+</body>
+</html>

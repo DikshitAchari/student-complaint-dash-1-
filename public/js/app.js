@@ -797,17 +797,84 @@ function showAdminDashboard() {
   loadAllComplaints();
 }
 
+function refreshAdminDashboard() {
+  showToast('Refreshing dashboard...', 'info');
+  loadAdminStats();
+  loadAllComplaints();
+}
+
 function loadAdminStats() {
-  fetch(API_ENDPOINTS.GET_ALL_STATS)
-    .then(response => response.json())
-    .then(stats => {
-      document.getElementById('adminStatTotal').textContent = stats.total || 0;
-      document.getElementById('adminStatOpen').textContent = stats.open || 0;
-      document.getElementById('adminStatInProgress').textContent = stats.in_progress || 0;
-      document.getElementById('adminStatResolved').textContent = stats.resolved || 0;
+  console.log('Loading admin stats from:', API_ENDPOINTS.GET_ALL_STATS);
+  
+  fetch(API_ENDPOINTS.GET_ALL_STATS, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    cache: 'no-cache'
+  })
+    .then(response => {
+      console.log('Admin stats response status:', response.status);
+      console.log('Admin stats response headers:', response.headers);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(text => {
+      console.log('Admin stats raw response:', text);
+      try {
+        const stats = JSON.parse(text);
+        console.log('Admin stats parsed:', stats);
+        
+        // Update the stat cards with explicit type conversion and validation
+        const totalEl = document.getElementById('adminStatTotal');
+        const openEl = document.getElementById('adminStatOpen');
+        const inProgressEl = document.getElementById('adminStatInProgress');
+        const resolvedEl = document.getElementById('adminStatResolved');
+        
+        console.log('Elements found:', { totalEl, openEl, inProgressEl, resolvedEl });
+        
+        if (totalEl) {
+          totalEl.textContent = String(parseInt(stats.total) || 0);
+          console.log('Updated adminStatTotal to:', totalEl.textContent);
+        }
+        if (openEl) {
+          openEl.textContent = String(parseInt(stats.open) || 0);
+          console.log('Updated adminStatOpen to:', openEl.textContent);
+        }
+        if (inProgressEl) {
+          inProgressEl.textContent = String(parseInt(stats.in_progress) || 0);
+          console.log('Updated adminStatInProgress to:', inProgressEl.textContent);
+        }
+        if (resolvedEl) {
+          resolvedEl.textContent = String(parseInt(stats.resolved) || 0);
+          console.log('Updated adminStatResolved to:', resolvedEl.textContent);
+        }
+        
+        showToast('Statistics updated successfully', 'success');
+      } catch (parseError) {
+        console.error('JSON Parse Error:', parseError);
+        console.error('Response text was:', text);
+        throw new Error('Failed to parse JSON response');
+      }
     })
     .catch(error => {
       console.error('Error fetching admin stats:', error);
+      console.error('Error details:', error.message, error.stack);
+      showToast('Failed to load statistics: ' + error.message, 'error');
+      
+      // Set to 0 if there's an error
+      const totalEl = document.getElementById('adminStatTotal');
+      const openEl = document.getElementById('adminStatOpen');
+      const inProgressEl = document.getElementById('adminStatInProgress');
+      const resolvedEl = document.getElementById('adminStatResolved');
+      
+      if (totalEl) totalEl.textContent = '0';
+      if (openEl) openEl.textContent = '0';
+      if (inProgressEl) inProgressEl.textContent = '0';
+      if (resolvedEl) resolvedEl.textContent = '0';
     });
 }
 

@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = 'http://localhost/student-complaint-dash%20(1)/backend/api';
+const API_BASE_URL = 'http://localhost/student-complaint-dash/backend/api';
 
 const API_ENDPOINTS = {
     // Auth endpoints
