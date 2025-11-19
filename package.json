@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "Student Complaint Management System",
   "scripts": {
-    "dev": "php -S localhost:8000 -t public",
-    "start": "php -S localhost:8000 -t public",
-    "serve": "php -S localhost:3000 -t public",
+    "dev": "php -S localhost:8000 -t . router.php",
+    "start": "php -S localhost:8000 -t . router.php",
+    "serve": "php -S localhost:3000 -t . router.php",
     "setup": "node scripts/setup.js",
     "check": "php test_connection.php"
   },
