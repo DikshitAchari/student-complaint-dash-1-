@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Registration</title>
+</head>
+<body>
+    <h1>Test Registration</h1>
+    <button onclick="testRegistration()">Register Test User</button>
+    <div id="result"></div>
+
+    <script>
+        async function testRegistration() {
+            const data = {
+                full_name: "Frontend Test User",
+                usn: "FRONTEND01",
+                email: "frontend@example.com",
+                password: "password123",
+                role: "student"
+            };
+
+            try {
+                const response = await fetch('http://localhost:8000/backend/api/auth/register.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const text = await response.text();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(JSON.parse(text), null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = '<pre>Error: ' + error.message + '</pre>';
+            }
+        }
+    </script>
+</body>
+</html>

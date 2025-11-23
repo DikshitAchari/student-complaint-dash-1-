@@ -20,13 +20,13 @@ class User {
     }
 
     // Create user
-    public function create() {
+    public function create($db) {
         $query = "INSERT INTO " . $this->table_name . " 
                   SET full_name=:full_name, usn=:usn, email=:email, 
-                      password=:password, role=:role, email_verified=1, 
+                      password=:password, role=:role, email_verified=0, 
                       department=:department, year=:year, contact=:contact";
 
-        $stmt = $this->conn->prepare($query);
+        $stmt = $db->prepare($query);
 
         // Sanitize
         $this->full_name = htmlspecialchars(strip_tags($this->full_name));
@@ -36,24 +36,27 @@ class User {
         $this->role = htmlspecialchars(strip_tags($this->role));
 
         // Bind values
+        // Fix the password hashing to avoid the notice
+        $hashedPassword = password_hash($this->password, PASSWORD_BCRYPT);
         $stmt->bindParam(":full_name", $this->full_name);
         $stmt->bindParam(":usn", $this->usn);
         $stmt->bindParam(":email", $this->email);
-        $stmt->bindParam(":password", password_hash($this->password, PASSWORD_BCRYPT));
+        $stmt->bindParam(":password", $hashedPassword);
         $stmt->bindParam(":role", $this->role);
         $stmt->bindParam(":department", $this->department);
         $stmt->bindParam(":year", $this->year);
         $stmt->bindParam(":contact", $this->contact);
 
         if($stmt->execute()) {
+            $this->id = $db->lastInsertId();
             return true;
         }
         return false;
     }
-
+    
     // Login user
     public function login() {
-        $query = "SELECT id, full_name, usn, email, password, role, department, year, contact 
+        $query = "SELECT id, full_name, usn, email, password, role, department, year, contact, email_verified 
                   FROM " . $this->table_name . " 
                   WHERE usn = :usn LIMIT 1";
 
@@ -64,6 +67,11 @@ class User {
         if($stmt->rowCount() > 0) {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             
+            // Check if email is verified for students
+            if ($row['role'] == 'student' && !$row['email_verified']) {
+                return false; // Email not verified
+            }
+            
             if(password_verify($this->password, $row['password'])) {
                 $this->id = $row['id'];
                 $this->full_name = $row['full_name'];
@@ -72,6 +80,7 @@ class User {
                 $this->department = $row['department'];
                 $this->year = $row['year'];
                 $this->contact = $row['contact'];
+                $this->email_verified = $row['email_verified'];
                 return true;
             }
         }
@@ -94,6 +103,81 @@ class User {
         $stmt->bindParam(":email", $this->email);
         $stmt->execute();
         return $stmt->rowCount() > 0;
+    }
+
+    // Get user by email
+    public function getUserByEmail() {
+        $query = "SELECT id, full_name, usn, email, password, role, department, year, contact, email_verified 
+                  FROM " . $this->table_name . " 
+                  WHERE email = :email LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":email", $this->email);
+        $stmt->execute();
+
+        if($stmt->rowCount() > 0) {
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $this->id = $row['id'];
+            $this->full_name = $row['full_name'];
+            $this->usn = $row['usn'];
+            $this->email = $row['email'];
+            $this->role = $row['role'];
+            $this->department = $row['department'];
+            $this->year = $row['year'];
+            $this->contact = $row['contact'];
+            $this->email_verified = $row['email_verified'];
+            return true;
+        }
+        return false;
+    }
+
+    // Save verification token
+    public function saveVerificationToken($token, $expirySeconds) {
+        // Delete any existing tokens for this user
+        $deleteQuery = "DELETE FROM email_verification_tokens WHERE user_id = :user_id";
+        $deleteStmt = $this->conn->prepare($deleteQuery);
+        $deleteStmt->bindParam(":user_id", $this->id);
+        $deleteStmt->execute();
+        
+        // Insert new token
+        $expiresAt = date('Y-m-d H:i:s', time() + $expirySeconds);
+        $insertQuery = "INSERT INTO email_verification_tokens (user_id, token, expires_at) VALUES (:user_id, :token, :expires_at)";
+        $insertStmt = $this->conn->prepare($insertQuery);
+        $insertStmt->bindParam(":user_id", $this->id);
+        $insertStmt->bindParam(":token", $token);
+        $insertStmt->bindParam(":expires_at", $expiresAt);
+        
+        return $insertStmt->execute();
+    }
+
+    // Verify token
+    public function verifyToken($token) {
+        $query = "SELECT id FROM email_verification_tokens 
+                  WHERE user_id = :user_id AND token = :token AND expires_at > UTC_TIMESTAMP() LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":user_id", $this->id);
+        $stmt->bindParam(":token", $token);
+        $stmt->execute();
+        
+        return $stmt->rowCount() > 0;
+    }
+
+    // Mark user as verified
+    public function markAsVerified() {
+        $query = "UPDATE " . $this->table_name . " SET email_verified = 1 WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $this->id);
+        
+        if ($stmt->execute()) {
+            // Delete verification token
+            $deleteQuery = "DELETE FROM email_verification_tokens WHERE user_id = :user_id";
+            $deleteStmt = $this->conn->prepare($deleteQuery);
+            $deleteStmt->bindParam(":user_id", $this->id);
+            $deleteStmt->execute();
+            
+            $this->email_verified = 1;
+            return true;
+        }
+        return false;
     }
 
     // Update user profile
@@ -137,7 +221,7 @@ class User {
 
     // Get user by ID
     public function getById() {
-        $query = "SELECT id, full_name, usn, email, role, department, year, contact 
+        $query = "SELECT id, full_name, usn, email, role, department, year, contact, email_verified
                   FROM " . $this->table_name . " WHERE id = :id LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $this->id);
@@ -152,6 +236,32 @@ class User {
             $this->department = $row['department'];
             $this->year = $row['year'];
             $this->contact = $row['contact'];
+            $this->email_verified = $row['email_verified'];
+            return true;
+        }
+        return false;
+    }
+
+    // Get user by USN
+    public function getByUsn() {
+        $query = "SELECT id, full_name, usn, email, password, role, department, year, contact, email_verified 
+                  FROM " . $this->table_name . " 
+                  WHERE usn = :usn LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":usn", $this->usn);
+        $stmt->execute();
+
+        if($stmt->rowCount() > 0) {
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $this->id = $row['id'];
+            $this->full_name = $row['full_name'];
+            $this->usn = $row['usn'];
+            $this->email = $row['email'];
+            $this->role = $row['role'];
+            $this->department = $row['department'];
+            $this->year = $row['year'];
+            $this->contact = $row['contact'];
+            $this->email_verified = $row['email_verified'];
             return true;
         }
         return false;

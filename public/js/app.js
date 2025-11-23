@@ -97,7 +97,16 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         loadDashboard();
       }, 500);
     } else {
-      showToast(data.message || 'Invalid USN or password', 'error');
+      // Handle specific error messages
+      if (data.message === "Email not verified") {
+        showToast('Please verify your email before logging in. Check your email for verification code.', 'error');
+        // Show verification page
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('verificationPage').style.display = 'flex';
+        document.getElementById('verificationEmail').value = ''; // Will be set when user enters email
+      } else {
+        showToast(data.message || 'Invalid USN or password', 'error');
+      }
     }
   } catch (error) {
     console.error('Login error:', error);
@@ -200,26 +209,25 @@ document.getElementById('registerForm').addEventListener('submit', async functio
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        full_name: fullName,
-        usn,
-        email,
-        password,
-        role,
-        department: '',
-        year: '',
-        contact: ''
-      })
+      body: JSON.stringify({ full_name: fullName, usn, email, password, role })
     });
 
     const data = await response.json();
 
     if (data.success) {
-      showToast('Registration successful! Please login.', 'success');
-      setTimeout(() => {
-        showLogin();
-        document.getElementById('registerForm').reset();
-      }, 1500);
+      showToast(data.message, 'success');
+      
+      // If verification is required, show verification form
+      if (data.requires_verification) {
+        document.getElementById('registerPage').style.display = 'none';
+        document.getElementById('verificationPage').style.display = 'flex';
+        document.getElementById('verificationEmail').value = email;
+      } else {
+        // Otherwise, show login page
+        setTimeout(() => {
+          showLogin();
+        }, 2000);
+      }
     } else {
       showToast(data.message || 'Registration failed', 'error');
     }
@@ -360,7 +368,7 @@ function showNewComplaint() {
   document.querySelectorAll('.nav-item').forEach(item => {
     item.classList.remove('active');
   });
-  document.querySelectorAll('.nav-item')[1].classList.add('active');
+  document.querySelectorAll('.nav-item')[2].classList.add('active');
 }
 
 // Character counter for description
@@ -486,7 +494,7 @@ function showMyComplaints() {
   document.querySelectorAll('.nav-item').forEach(item => {
     item.classList.remove('active');
   });
-  document.querySelectorAll('.nav-item')[2].classList.add('active');
+  document.querySelectorAll('.nav-item')[3].classList.add('active');
   
   filterComplaints();
 }
@@ -654,7 +662,7 @@ function showProfile() {
   document.querySelectorAll('.nav-item').forEach(item => {
     item.classList.remove('active');
   });
-  document.querySelectorAll('.nav-item')[3].classList.add('active');
+  document.querySelectorAll('.nav-item')[4].classList.add('active');
   
   loadProfile();
 }
@@ -1159,5 +1167,75 @@ window.addEventListener('DOMContentLoaded', function() {
     // No session found, show login page
     console.log('No active session found');
     document.getElementById('loginPage').style.display = 'flex';
+  }
+});
+
+// Email Verification Functions
+function showVerification() {
+  document.getElementById('registerPage').style.display = 'none';
+  document.getElementById('verificationPage').style.display = 'flex';
+}
+
+function showRegisterFromVerification() {
+  document.getElementById('verificationPage').style.display = 'none';
+  document.getElementById('registerPage').style.display = 'flex';
+}
+
+// Resend verification code
+async function resendVerificationCode() {
+  const email = document.getElementById('verificationEmail').value;
+  
+  try {
+    const response = await fetch(API_ENDPOINTS.SEND_VERIFICATION, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showToast('Verification code sent to your email', 'success');
+    } else {
+      showToast(data.message || 'Failed to send verification code', 'error');
+    }
+  } catch (error) {
+    console.error('Resend verification error:', error);
+    showToast('Failed to connect to server', 'error');
+  }
+}
+
+// Verify email
+document.getElementById('verificationForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const email = document.getElementById('verificationEmail').value;
+  const token = document.getElementById('verificationCode').value;
+
+  try {
+    const response = await fetch(API_ENDPOINTS.VERIFY_EMAIL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, token })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showToast('Email verified successfully! You can now login.', 'success');
+      setTimeout(() => {
+        document.getElementById('verificationPage').style.display = 'none';
+        showLogin();
+      }, 2000);
+    } else {
+      showToast(data.message || 'Invalid verification code', 'error');
+    }
+  } catch (error) {
+    console.error('Verification error:', error);
+    showToast('Failed to connect to server', 'error');
   }
 });

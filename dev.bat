@@ -17,4 +17,4 @@ echo.
 echo ========================================
 echo.
 
-C:\xampp\php\php.exe -S localhost:8000 -t public
+php -S localhost:8000 -t . router.php

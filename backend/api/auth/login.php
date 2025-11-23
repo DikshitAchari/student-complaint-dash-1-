@@ -15,7 +15,7 @@ if(!empty($data->usn) && !empty($data->password)) {
     $user->password = $data->password;
     $loginType = isset($data->loginType) ? $data->loginType : 'student';
 
-    if($user->login()) {
+    if ($user->login()) {
         // Validate login type matches user role
         if($loginType === 'admin' && $user->role !== 'admin') {
             http_response_code(401);
@@ -45,8 +45,19 @@ if(!empty($data->usn) && !empty($data->password)) {
             )
         ));
     } else {
-        http_response_code(401);
-        echo json_encode(array("success" => false, "message" => "Invalid USN or password"));
+        // Login failed. Determine the reason.
+        $tempUser = new User($db);
+        $tempUser->usn = $data->usn;
+
+        // Check if the user exists and if their email is unverified.
+        if ($tempUser->getByUsn() && $tempUser->role === 'student' && !$tempUser->email_verified) {
+            http_response_code(401);
+            echo json_encode(array("success" => false, "message" => "Email not verified. Please check your email for the verification code."));
+        } else {
+            // Otherwise, it's just invalid credentials.
+            http_response_code(401);
+            echo json_encode(array("success" => false, "message" => "Invalid USN or password"));
+        }
     }
 } else {
     http_response_code(400);
