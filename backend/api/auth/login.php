@@ -1,7 +1,7 @@
 <?php
-include_once '../../config/cors.php';
-include_once '../../config/database.php';
-include_once '../../models/User.php';
+include_once 'C:\Users\diksh\Videos\Captures\student-complaint-dashboard/backend/config/cors.php';
+include_once 'C:\Users\diksh\Videos\Captures\student-complaint-dashboard/backend/config/database.php';
+include_once 'C:\Users\diksh\Videos\Captures\student-complaint-dashboard/backend/models/User.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -12,10 +12,11 @@ $data = json_decode(file_get_contents("php://input"));
 
 if(!empty($data->usn) && !empty($data->password)) {
     $user->usn = $data->usn;
-    $user->password = $data->password;
+    // Don't set the password here, just pass it to the login method
     $loginType = isset($data->loginType) ? $data->loginType : 'student';
 
-    if ($user->login()) {
+    // Pass the password to the login method for verification
+    if ($user->login($data->password)) {
         // Validate login type matches user role
         if($loginType === 'admin' && $user->role !== 'admin') {
             http_response_code(401);

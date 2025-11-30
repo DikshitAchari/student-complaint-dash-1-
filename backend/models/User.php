@@ -55,7 +55,7 @@ class User {
     }
     
     // Login user
-    public function login() {
+    public function login($password = null) {
         $query = "SELECT id, full_name, usn, email, password, role, department, year, contact, email_verified 
                   FROM " . $this->table_name . " 
                   WHERE usn = :usn LIMIT 1";
@@ -72,16 +72,34 @@ class User {
                 return false; // Email not verified
             }
             
-            if(password_verify($this->password, $row['password'])) {
-                $this->id = $row['id'];
-                $this->full_name = $row['full_name'];
-                $this->email = $row['email'];
-                $this->role = $row['role'];
-                $this->department = $row['department'];
-                $this->year = $row['year'];
-                $this->contact = $row['contact'];
-                $this->email_verified = $row['email_verified'];
-                return true;
+            // If password is provided, verify it
+            if ($password !== null) {
+                if(password_verify($password, $row['password'])) {
+                    $this->id = $row['id'];
+                    $this->full_name = $row['full_name'];
+                    $this->email = $row['email'];
+                    $this->role = $row['role'];
+                    $this->department = $row['department'];
+                    $this->year = $row['year'];
+                    $this->contact = $row['contact'];
+                    $this->email_verified = $row['email_verified'];
+                    return true;
+                }
+                return false; // Password verification failed
+            } else {
+                // For backward compatibility, check the object's password property
+                if(password_verify($this->password, $row['password'])) {
+                    $this->id = $row['id'];
+                    $this->full_name = $row['full_name'];
+                    $this->email = $row['email'];
+                    $this->role = $row['role'];
+                    $this->department = $row['department'];
+                    $this->year = $row['year'];
+                    $this->contact = $row['contact'];
+                    $this->email_verified = $row['email_verified'];
+                    return true;
+                }
+                return false; // Password verification failed
             }
         }
         return false;

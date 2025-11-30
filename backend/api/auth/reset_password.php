@@ -4,6 +4,13 @@ include_once '../../config/database.php';
 include_once '../../models/User.php';
 include_once '../../utils/email_verification.php';
 
+// Ensure the required function is available
+if (!function_exists('generateVerificationCode')) {
+    http_response_code(500);
+    echo json_encode(["success" => false, "message" => "Server configuration error: missing required functions"]);
+    exit();
+}
+
 // Set timezone to UTC to prevent expiry issues
 date_default_timezone_set('UTC');
 
@@ -61,16 +68,16 @@ if ($action === 'send_reset_otp') {
         echo json_encode(["success" => false, "message" => "Failed to generate reset token."]);
     }
 
-} elseif ($action === 'reset_password') {
-    if (empty($data->email) || empty($data->otp) || empty($data->new_password)) {
+} elseif ($action === 'verify_otp' || $action === 'reset_password') {
+    // Handle both verify_otp and reset_password actions (to support both frontend implementations)
+    if (empty($data->email) || empty($data->otp)) {
         http_response_code(400);
-        echo json_encode(["success" => false, "message" => "Email, OTP, and new password are required."]);
+        echo json_encode(["success" => false, "message" => "Email and OTP are required."]);
         exit();
     }
 
     $email = $data->email;
     $otp = $data->otp;
-    $new_password = $data->new_password;
 
     $query = "SELECT u.id FROM users u JOIN email_verification_tokens t ON u.id = t.user_id WHERE u.email = :email AND t.token = :token AND t.expires_at > UTC_TIMESTAMP() ORDER BY t.created_at DESC LIMIT 1";
     $stmt = $db->prepare($query);
@@ -79,6 +86,21 @@ if ($action === 'send_reset_otp') {
     $stmt->execute();
 
     if ($stmt->rowCount() > 0) {
+        // If this is just verification (not password reset), return success
+        if ($action === 'verify_otp') {
+            http_response_code(200);
+            echo json_encode(["success" => true, "message" => "OTP verified successfully."]);
+            exit();
+        }
+
+        // If this is password reset, check for new_password
+        if (empty($data->new_password)) {
+            http_response_code(400);
+            echo json_encode(["success" => false, "message" => "New password is required."]);
+            exit();
+        }
+
+        $new_password = $data->new_password;
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         $user_id = $row['id'];
 

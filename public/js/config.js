@@ -7,6 +7,7 @@ const API_ENDPOINTS = {
     REGISTER: `${API_BASE_URL}/auth/register.php`,
     SEND_VERIFICATION: `${API_BASE_URL}/auth/sendVerification.php`,
     VERIFY_EMAIL: `${API_BASE_URL}/auth/verifyEmail.php`,
+    RESET_PASSWORD: `${API_BASE_URL}/auth/reset_password.php`,
     
     // Complaint endpoints
     CREATE_COMPLAINT: `${API_BASE_URL}/complaints/create.php`,
