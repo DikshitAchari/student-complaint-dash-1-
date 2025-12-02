@@ -989,6 +989,8 @@ textarea.form-control {
   padding: var(--space-24);
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-teal-700) 100%);
   position: relative;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 1;
 }
 
 /* Background image overlay support */
@@ -1137,10 +1139,34 @@ textarea.form-control {
   flex: 1;
 }
 
+/* Forgot Password Success Message */
+.success-message {
+  text-align: center;
+  padding: var(--space-32);
+}
+
+.success-icon {
+  font-size: 48px;
+  color: var(--color-success);
+  margin-bottom: var(--space-16);
+}
+
+.success-message h3 {
+  margin-bottom: var(--space-8);
+  color: var(--color-text);
+}
+
+.success-message p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-24);
+}
+
+/* OTP Input Styles */
 .otp-input-wrapper {
   display: flex;
   gap: var(--space-8);
   margin-bottom: var(--space-12);
+  justify-content: center;
 }
 
 .otp-input {
@@ -1153,12 +1179,18 @@ textarea.form-control {
   border-radius: var(--radius-base);
   background: var(--color-surface);
   color: var(--color-text);
+  transition: all 0.2s ease;
 }
 
 .otp-input:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: var(--focus-ring);
+  transform: scale(1.05);
+}
+
+.otp-input.valid {
+  border-color: var(--color-success);
 }
 
 .otp-timer {
@@ -1168,41 +1200,21 @@ textarea.form-control {
   margin-bottom: var(--space-12);
 }
 
-.verified-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-4);
-  color: var(--color-success);
-  font-size: var(--font-size-sm);
+.resend-otp-link {
+  color: var(--color-primary);
+  text-decoration: none;
   font-weight: var(--font-weight-medium);
+  transition: all 0.2s ease;
 }
 
-.password-strength {
-  margin-top: var(--space-8);
-  height: 4px;
-  background: var(--color-border);
-  border-radius: var(--radius-full);
-  overflow: hidden;
+.resend-otp-link:hover {
+  text-decoration: underline;
 }
 
-.password-strength-bar {
-  height: 100%;
-  transition: width var(--duration-normal);
-}
-
-.password-strength-weak {
-  width: 33%;
-  background: var(--color-error);
-}
-
-.password-strength-medium {
-  width: 66%;
-  background: var(--color-warning);
-}
-
-.password-strength-strong {
-  width: 100%;
-  background: var(--color-success);
+.resend-otp-link:disabled {
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  text-decoration: none;
 }
 
 /* Dashboard */
@@ -1608,6 +1620,7 @@ textarea.form-control {
   align-items: center;
   justify-content: center;
   font-size: 48px;
+  overflow: hidden;
 }
 
 .profile-info h3 {
@@ -1639,6 +1652,42 @@ textarea.form-control {
 
 .profile-stat-label {
   font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Profile Photo */
+.profile-photo-section {
+  margin-bottom: var(--space-24);
+  padding-bottom: var(--space-24);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.profile-photo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-12);
+}
+
+.profile-photo-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: var(--radius-full);
+  background: var(--color-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  overflow: hidden;
+}
+
+.profile-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-photo-placeholder {
   color: var(--color-text-secondary);
 }
 
@@ -1786,7 +1835,70 @@ textarea.form-control {
   border: 1px solid var(--color-border);
 }
 
-/* Toast */
+/* Spinner/Loader */
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--color-primary);
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.spinner.spinner-dark {
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--color-text);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Smooth transitions for auth pages */
+.auth-container {
+  transition: opacity 0.3s ease-in-out;
+  opacity: 1;
+}
+
+.auth-container.smooth-transition {
+  transition: opacity 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Button loading state */
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.btn.loading-state {
+  position: relative;
+  pointer-events: none;
+}
+
+.btn.loading-state::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  top: 50%;
+  left: 50%;
+  margin-top: -8px;
+  margin-left: -8px;
+}
+
+.btn:disabled:hover {
+  transform: none;
+}
+
+/* Toast improvements */
 .toast {
   position: fixed;
   top: var(--space-24);
@@ -1799,6 +1911,11 @@ textarea.form-control {
   z-index: 2000;
   display: none;
   min-width: 300px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
 }
 
 .toast.show {
@@ -1817,16 +1934,34 @@ textarea.form-control {
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-element {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
 .toast-success {
   border-left: 4px solid var(--color-success);
+  background: linear-gradient(to right, rgba(33, 128, 141, 0.1), transparent);
 }
 
 .toast-error {
   border-left: 4px solid var(--color-error);
+  background: linear-gradient(to right, rgba(192, 21, 47, 0.1), transparent);
 }
 
 .toast-info {
   border-left: 4px solid var(--color-info);
+  background: linear-gradient(to right, rgba(98, 108, 113, 0.1), transparent);
 }
 
 /* Responsive */
@@ -1893,4 +2028,82 @@ textarea.form-control {
     right: var(--space-16);
     min-width: auto;
   }
+}
+
+/* Forgot Password Success Message */
+.success-message {
+  text-align: center;
+  padding: var(--space-32);
+}
+
+.success-icon {
+  font-size: 48px;
+  color: var(--color-success);
+  margin-bottom: var(--space-16);
+}
+
+.success-message h3 {
+  margin-bottom: var(--space-8);
+  color: var(--color-text);
+}
+
+.success-message p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-24);
+}
+
+/* OTP Input Styles */
+.otp-input-wrapper {
+  display: flex;
+  gap: var(--space-8);
+  margin-bottom: var(--space-12);
+  justify-content: center;
+}
+
+.otp-input {
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-base);
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: all 0.2s ease;
+}
+
+.otp-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
+  transform: scale(1.05);
+}
+
+.otp-input.valid {
+  border-color: var(--color-success);
+}
+
+.otp-timer {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-12);
+}
+
+.resend-otp-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: all 0.2s ease;
+}
+
+.resend-otp-link:hover {
+  text-decoration: underline;
+}
+
+.resend-otp-link:disabled {
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  text-decoration: none;
 }

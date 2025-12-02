@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smooth Transition Example</title>
+    <style>
+        /* Base styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        /* Container with smooth transition */
+        .auth-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            opacity: 1;
+        }
+
+        .auth-container.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Form styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background-color: #21808d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #1a6872;
+        }
+
+        /* Navigation links */
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .auth-footer a {
+            color: #21808d;
+            text-decoration: none;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Fade in animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-element {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <h1>Smooth Transition Example</h1>
+    
+    <!-- Login Page -->
+    <div id="loginPage" class="auth-container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="loginEmail">Email:</label>
+                <input type="email" id="loginEmail" class="form-control" placeholder="Enter your email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="btn">Login</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Don't have an account? <a href="#" onclick="showRegister()">Register here</a></p>
+        </div>
+    </div>
+    
+    <!-- Register Page (initially hidden) -->
+    <div id="registerPage" class="auth-container hidden">
+        <h2>Register</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="regName">Full Name:</label>
+                <input type="text" id="regName" class="form-control" placeholder="Enter your full name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="regEmail">Email:</label>
+                <input type="email" id="regEmail" class="form-control" placeholder="Enter your email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="regPassword">Password:</label>
+                <input type="password" id="regPassword" class="form-control" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="btn">Register</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Already have an account? <a href="#" onclick="showLogin()">Login here</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Show login page with smooth transition
+        function showLogin() {
+            // Hide register page
+            const registerPage = document.getElementById('registerPage');
+            registerPage.classList.add('hidden');
+            
+            // Show login page after a small delay
+            setTimeout(() => {
+                const loginPage = document.getElementById('loginPage');
+                loginPage.classList.remove('hidden');
+                
+                // Add fade-in effect to elements
+                const loginElements = loginPage.querySelectorAll('.form-group, .btn, .auth-footer');
+                loginElements.forEach((el, index) => {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(10px)';
+                    setTimeout(() => {
+                        el.classList.add('fade-in-element');
+                        el.style.opacity = '';
+                        el.style.transform = '';
+                    }, 100 * index);
+                });
+            }, 300);
+        }
+
+        // Show register page with smooth transition
+        function showRegister() {
+            // Hide login page
+            const loginPage = document.getElementById('loginPage');
+            loginPage.classList.add('hidden');
+            
+            // Show register page after a small delay
+            setTimeout(() => {
+                const registerPage = document.getElementById('registerPage');
+                registerPage.classList.remove('hidden');
+                
+                // Add fade-in effect to elements
+                const registerElements = registerPage.querySelectorAll('.form-group, .btn, .auth-footer');
+                registerElements.forEach((el, index) => {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(10px)';
+                    setTimeout(() => {
+                        el.classList.add('fade-in-element');
+                        el.style.opacity = '';
+                        el.style.transform = '';
+                    }, 100 * index);
+                });
+            }, 300);
+        }
+
+        // Handle form submissions
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Login form submitted!');
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Register form submitted!');
+        });
+    </script>
+</body>
+</html>

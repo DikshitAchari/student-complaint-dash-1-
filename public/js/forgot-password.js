@@ -15,6 +15,12 @@ document.addEventListener('DOMContentLoaded', function() {
         forgotPasswordEmailForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             const email = document.getElementById('forgotPasswordEmail').value;
+            const submitBtn = document.querySelector('#forgotPasswordEmailForm button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.classList.add('loading-state');
+            submitBtn.innerHTML = 'Sending Email... Please wait';
             
             console.log('Sending request to:', API_ENDPOINTS.RESET_PASSWORD);
             console.log('Request data:', { action: 'send_reset_otp', email: email });
@@ -44,6 +50,12 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (error) {
                 console.error('Error details:', error);
                 showToast('Failed to connect to the server. Please check your internet connection and try again.', 'error');
+            } finally {
+                // Reset button state after a short delay for better UX
+                setTimeout(() => {
+                    submitBtn.classList.remove('loading-state');
+                    submitBtn.innerHTML = originalBtnText;
+                }, 500);
             }
         });
     }
@@ -53,6 +65,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (otpVerificationForm) {
         otpVerificationForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            const submitBtn = document.querySelector('#otpVerificationForm button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.classList.add('loading-state');
+            submitBtn.innerHTML = 'Verifying... Please wait';
             
             // Get email from the first step
             const email = document.getElementById('forgotPasswordEmail').value;
@@ -66,6 +85,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (otp.length !== 6) {
                 showToast('Please enter a valid 6-digit code', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
                 return;
             }
             
@@ -89,6 +110,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } catch (error) {
                 showToast('Failed to connect to the server.', 'error');
+            } finally {
+                // Reset button state
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }, 1000);
             }
         });
     }
@@ -101,8 +128,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const newPassword = document.getElementById('newPassword').value;
             const confirmNewPassword = document.getElementById('confirmNewPassword').value;
             
+            const submitBtn = document.querySelector('#resetPasswordForm button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.classList.add('loading-state');
+            submitBtn.innerHTML = 'Updating Password... Please wait';
+            
             if (newPassword !== confirmNewPassword) {
                 showToast('Passwords do not match', 'error');
+                submitBtn.classList.remove('loading-state');
+                submitBtn.innerHTML = originalBtnText;
                 return;
             }
             
@@ -142,6 +178,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } catch (error) {
                 showToast('Failed to connect to the server.', 'error');
+            } finally {
+                // Reset button state
+                setTimeout(() => {
+                    submitBtn.classList.remove('loading-state');
+                    submitBtn.innerHTML = originalBtnText;
+                }, 500);
             }
         });
     }
@@ -229,6 +271,13 @@ function togglePassword(inputId) {
 // Resend OTP function
 async function resendForgotPasswordOTP() {
     const email = document.getElementById('forgotPasswordEmail').value;
+    const resendLink = document.querySelector('.resend-otp-link');
+    
+    // Store original text and update to loading state
+    const originalText = resendLink.textContent;
+    resendLink.textContent = 'Sending...';
+    resendLink.style.pointerEvents = 'none';
+    resendLink.style.opacity = '0.7';
     
     try {
         const response = await fetch(API_ENDPOINTS.RESET_PASSWORD, {
@@ -246,6 +295,13 @@ async function resendForgotPasswordOTP() {
         }
     } catch (error) {
         showToast('Failed to connect to the server.', 'error');
+    } finally {
+        // Reset link text after a delay
+        setTimeout(() => {
+            resendLink.textContent = originalText;
+            resendLink.style.pointerEvents = 'auto';
+            resendLink.style.opacity = '1';
+        }, 2000);
     }
 }
 

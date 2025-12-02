@@ -67,6 +67,13 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   e.preventDefault();
   const usn = document.getElementById('loginUsn').value.trim();
   const password = document.getElementById('loginPassword').value;
+  
+  const loginBtn = document.querySelector('#loginForm button[type="submit"]');
+  const originalBtnText = loginBtn.innerHTML;
+  
+  // Show loading state
+  loginBtn.classList.add('loading-state');
+  loginBtn.innerHTML = 'Logging in... Please wait';
 
   try {
     const response = await fetch(API_ENDPOINTS.LOGIN, {
@@ -91,19 +98,28 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
       
       showToast('Login successful!', 'success');
       setTimeout(() => {
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'block';
-        initializeDashboard();
-        loadDashboard();
+        document.getElementById('loginPage').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('loginPage').style.display = 'none';
+          document.getElementById('dashboard').style.display = 'block';
+          initializeDashboard();
+          loadDashboard();
+        }, 300);
       }, 500);
     } else {
       // Handle specific error messages
       if (data.message === "Email not verified") {
         showToast('Please verify your email before logging in. Check your email for verification code.', 'error');
         // Show verification page
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('verificationPage').style.display = 'flex';
-        document.getElementById('verificationEmail').value = ''; // Will be set when user enters email
+        document.getElementById('loginPage').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('loginPage').style.display = 'none';
+          document.getElementById('verificationPage').style.display = 'flex';
+          // Trigger reflow
+          document.getElementById('verificationPage').offsetHeight;
+          document.getElementById('verificationPage').style.opacity = '1';
+          document.getElementById('verificationEmail').value = ''; // Will be set when user enters email
+        }, 300);
       } else {
         showToast(data.message || 'Invalid USN or password', 'error');
       }
@@ -111,6 +127,12 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   } catch (error) {
     console.error('Login error:', error);
     showToast('Failed to connect to server', 'error');
+  } finally {
+    // Reset button state
+    setTimeout(() => {
+      loginBtn.classList.remove('loading-state');
+      loginBtn.innerHTML = originalBtnText;
+    }, 500);
   }
 });
 
@@ -119,6 +141,13 @@ document.getElementById('adminLoginForm').addEventListener('submit', async funct
   e.preventDefault();
   const usn = document.getElementById('adminLoginUsn').value.trim();
   const password = document.getElementById('adminLoginPassword').value;
+  
+  const loginBtn = document.querySelector('#adminLoginForm button[type="submit"]');
+  const originalBtnText = loginBtn.innerHTML;
+  
+  // Show loading state
+  loginBtn.classList.add('loading-state');
+  loginBtn.innerHTML = 'Logging in... Please wait';
 
   try {
     const response = await fetch(API_ENDPOINTS.LOGIN, {
@@ -143,10 +172,13 @@ document.getElementById('adminLoginForm').addEventListener('submit', async funct
       
       showToast('Admin login successful!', 'success');
       setTimeout(() => {
-        document.getElementById('adminLoginPage').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'block';
-        initializeDashboard();
-        showAdminDashboard();
+        document.getElementById('adminLoginPage').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('adminLoginPage').style.display = 'none';
+          document.getElementById('dashboard').style.display = 'block';
+          initializeDashboard();
+          showAdminDashboard();
+        }, 300);
       }, 500);
     } else {
       showToast(data.message || 'Invalid admin credentials', 'error');
@@ -154,6 +186,12 @@ document.getElementById('adminLoginForm').addEventListener('submit', async funct
   } catch (error) {
     console.error('Admin login error:', error);
     showToast('Failed to connect to server', 'error');
+  } finally {
+    // Reset button state
+    setTimeout(() => {
+      loginBtn.classList.remove('loading-state');
+      loginBtn.innerHTML = originalBtnText;
+    }, 500);
   }
 });
 
@@ -185,6 +223,13 @@ document.getElementById('regPassword').addEventListener('input', function(e) {
 document.getElementById('registerForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   
+  const registerBtn = document.getElementById('registerBtn');
+  const originalBtnText = registerBtn.innerHTML;
+  
+  // Show loading state
+  registerBtn.classList.add('loading-state');
+  registerBtn.innerHTML = 'Registering... Please wait';
+  
   const fullName = document.getElementById('regFullName').value.trim();
   const usn = document.getElementById('regUsn').value.trim();
   const email = document.getElementById('regEmail').value.trim();
@@ -195,11 +240,15 @@ document.getElementById('registerForm').addEventListener('submit', async functio
 
   if (!termsAccepted) {
     showToast('Please accept the terms and conditions', 'error');
+    registerBtn.disabled = false;
+    registerBtn.innerHTML = originalBtnText;
     return;
   }
 
   if (password !== confirmPassword) {
     showToast('Passwords do not match', 'error');
+    registerBtn.disabled = false;
+    registerBtn.innerHTML = originalBtnText;
     return;
   }
 
@@ -217,16 +266,49 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     if (data.success) {
       showToast(data.message, 'success');
       
-      // If verification is required, show verification form
+      // If verification is required, show verification form with smooth transition
       if (data.requires_verification) {
-        document.getElementById('registerPage').style.display = 'none';
-        document.getElementById('verificationPage').style.display = 'flex';
-        document.getElementById('verificationEmail').value = email;
+        document.getElementById('registerPage').classList.add('smooth-transition');
+        document.getElementById('registerPage').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('registerPage').style.display = 'none';
+          document.getElementById('verificationPage').style.display = 'flex';
+          document.getElementById('verificationPage').classList.add('smooth-transition');
+          // Trigger reflow
+          document.getElementById('verificationPage').offsetHeight;
+          document.getElementById('verificationPage').style.opacity = '1';
+          document.getElementById('verificationEmail').value = email;
+          
+          // Add fade-in effect to elements
+          const verificationElements = document.querySelectorAll('#verificationPage .form-group, #verificationPage .btn, #verificationPage .auth-footer');
+          verificationElements.forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+              el.classList.add('fade-in-element');
+              el.style.opacity = '';
+              el.style.transform = '';
+            }, 100 * index);
+          });
+        }, 300);
       } else {
-        // Otherwise, show login page
+        // Otherwise, show login page with smooth transition
+        document.getElementById('registerPage').classList.add('smooth-transition');
+        document.getElementById('registerPage').style.opacity = '0';
         setTimeout(() => {
           showLogin();
-        }, 2000);
+          // Add fade-in effect to login elements
+          const loginElements = document.querySelectorAll('#loginPage .form-group, #loginPage .btn, #loginPage .auth-footer');
+          loginElements.forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+              el.classList.add('fade-in-element');
+              el.style.opacity = '';
+              el.style.transform = '';
+            }, 100 * index);
+          });
+        }, 500);
       }
     } else {
       showToast(data.message || 'Registration failed', 'error');
@@ -234,6 +316,12 @@ document.getElementById('registerForm').addEventListener('submit', async functio
   } catch (error) {
     console.error('Registration error:', error);
     showToast('Failed to connect to server', 'error');
+  } finally {
+    // Reset button state
+    setTimeout(() => {
+      registerBtn.classList.remove('loading-state');
+      registerBtn.innerHTML = originalBtnText;
+    }, 500);
   }
 });
 
@@ -427,6 +515,65 @@ function clearComplaintForm() {
   uploadedImages = [];
   displayPhotoPreview();
   document.getElementById('charCount').textContent = '0';
+}
+
+// Profile Photo Upload Handler
+let profilePhoto = null;
+
+function handleProfilePhotoUpload(event) {
+  const file = event.target.files[0];
+  
+  if (!file) return;
+  
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('Image is too large. Maximum 5MB allowed.', 'error');
+    return;
+  }
+  
+  if (!['image/jpeg', 'image/png'].includes(file.type)) {
+    showToast('Invalid image format. Only JPEG and PNG are allowed.', 'error');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    profilePhoto = e.target.result;
+    displayProfilePhotoPreview();
+  };
+  reader.readAsDataURL(file);
+  
+  event.target.value = '';
+}
+
+function displayProfilePhotoPreview() {
+  const previewContainer = document.getElementById('profilePhotoPreview');
+  const removeBtn = document.getElementById('removeProfilePhotoBtn');
+  
+  if (profilePhoto) {
+    previewContainer.innerHTML = `<img src="${profilePhoto}" alt="Profile Photo">`;
+    removeBtn.style.display = 'inline-block';
+    
+    // Update profile avatar in header
+    const profileAvatar = document.querySelector('.profile-avatar');
+    if (profileAvatar) {
+      profileAvatar.innerHTML = `<img src="${profilePhoto}" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+    }
+  } else {
+    previewContainer.innerHTML = '<span class="profile-photo-placeholder">📷</span>';
+    removeBtn.style.display = 'none';
+    
+    // Reset profile avatar in header
+    const profileAvatar = document.querySelector('.profile-avatar');
+    if (profileAvatar) {
+      profileAvatar.innerHTML = '👤';
+    }
+  }
+}
+
+function removeProfilePhoto() {
+  profilePhoto = null;
+  displayProfilePhotoPreview();
+  document.getElementById('profilePhotoInput').value = '';
 }
 
 // Complaint Form Submit
@@ -679,12 +826,23 @@ function loadProfile() {
   document.getElementById('profileDepartment').value = currentUser.department || '';
   document.getElementById('profileYear').value = currentUser.year || '';
   
+  // Display profile photo if it exists
+  if (currentUser.profile_photo) {
+    profilePhoto = currentUser.profile_photo;
+    displayProfilePhotoPreview();
+    // Update profile avatar in header
+    const profileAvatar = document.querySelector('.profile-avatar');
+    if (profileAvatar) {
+      profileAvatar.innerHTML = `<img src="${currentUser.profile_photo}" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+    }
+  }
+  
   fetch(`${API_ENDPOINTS.GET_STATS}?student_id=${currentUser.id}`)
     .then(response => response.json())
     .then(stats => {
       document.getElementById('profileStatTotal').textContent = stats.total || 0;
       document.getElementById('profileStatResolved').textContent = stats.resolved || 0;
-      document.getElementById('profileStatPending').textContent = (stats.open || 0) + (stats.in_progress || 0);
+      document.getElementById('profileStatPending').textContent = String((stats.open || 0) + (stats.in_progress || 0));
     })
     .catch(error => {
       console.error('Error fetching profile stats:', error);
@@ -702,7 +860,8 @@ document.getElementById('profileForm').addEventListener('submit', async function
     full_name: document.getElementById('profileFullName').value.trim(),
     contact: document.getElementById('profileContact').value.trim(),
     department: document.getElementById('profileDepartment').value.trim(),
-    year: document.getElementById('profileYear').value.trim()
+    year: document.getElementById('profileYear').value.trim(),
+    profile_photo: profilePhoto
   };
 
   try {
@@ -721,11 +880,22 @@ document.getElementById('profileForm').addEventListener('submit', async function
       currentUser.contact = profileData.contact;
       currentUser.department = profileData.department;
       currentUser.year = profileData.year;
+      currentUser.profile_photo = profileData.profile_photo;
       
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
       
       document.getElementById('headerUserName').textContent = currentUser.fullName;
       document.getElementById('profileName').textContent = currentUser.fullName;
+      
+      // Update profile avatar in header
+      const profileAvatar = document.querySelector('.profile-avatar');
+      if (profileAvatar) {
+        if (currentUser.profile_photo) {
+          profileAvatar.innerHTML = `<img src="${currentUser.profile_photo}" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+        } else {
+          profileAvatar.innerHTML = '👤';
+        }
+      }
       
       showToast('Profile updated successfully!', 'success');
     } else {
@@ -1184,6 +1354,13 @@ function showRegisterFromVerification() {
 // Resend verification code
 async function resendVerificationCode() {
   const email = document.getElementById('verificationEmail').value;
+  const resendLink = document.querySelector('.auth-footer a[href="#"]');
+  
+  // Store original text and update to loading state
+  const originalText = resendLink.textContent;
+  resendLink.textContent = 'Sending...';
+  resendLink.style.pointerEvents = 'none';
+  resendLink.style.opacity = '0.7';
   
   try {
     const response = await fetch(API_ENDPOINTS.SEND_VERIFICATION, {
@@ -1204,12 +1381,26 @@ async function resendVerificationCode() {
   } catch (error) {
     console.error('Resend verification error:', error);
     showToast('Failed to connect to server', 'error');
+  } finally {
+    // Reset link text after a delay
+    setTimeout(() => {
+      resendLink.textContent = originalText;
+      resendLink.style.pointerEvents = 'auto';
+      resendLink.style.opacity = '1';
+    }, 2000);
   }
 }
 
 // Verify email
 document.getElementById('verificationForm').addEventListener('submit', async function(e) {
   e.preventDefault();
+  
+  const submitBtn = document.querySelector('#verificationForm button[type="submit"]');
+  const originalBtnText = submitBtn.innerHTML;
+  
+  // Show loading state
+  submitBtn.classList.add('loading-state');
+  submitBtn.innerHTML = 'Verifying... Please wait';
   
   const email = document.getElementById('verificationEmail').value;
   const token = document.getElementById('verificationCode').value;
@@ -1228,8 +1419,11 @@ document.getElementById('verificationForm').addEventListener('submit', async fun
     if (data.success) {
       showToast('Email verified successfully! You can now login.', 'success');
       setTimeout(() => {
-        document.getElementById('verificationPage').style.display = 'none';
-        showLogin();
+        document.getElementById('verificationPage').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('verificationPage').style.display = 'none';
+          showLogin();
+        }, 300);
       }, 2000);
     } else {
       showToast(data.message || 'Invalid verification code', 'error');
@@ -1237,5 +1431,11 @@ document.getElementById('verificationForm').addEventListener('submit', async fun
   } catch (error) {
     console.error('Verification error:', error);
     showToast('Failed to connect to server', 'error');
+  } finally {
+    // Reset button state
+    setTimeout(() => {
+      submitBtn.classList.remove('loading-state');
+      submitBtn.innerHTML = originalBtnText;
+    }, 500);
   }
 });

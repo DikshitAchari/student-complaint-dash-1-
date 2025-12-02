@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loader Animation Example</title>
+    <style>
+        /* CSS for the spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #21808d; /* --color-primary */
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .spinner.spinner-dark {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-top-color: #13343b; /* --color-text */
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Button with loading state */
+        .btn {
+            padding: 10px 20px;
+            background-color: #21808d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn.loading-state {
+            position: relative;
+            pointer-events: none;
+        }
+
+        .btn.loading-state::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            top: 50%;
+            left: 50%;
+            margin-top: -8px;
+            margin-left: -8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Loader Animation Examples</h1>
+    
+    <!-- Standalone spinner -->
+    <div>
+        <h2>Standalone Spinner</h2>
+        <span class="spinner"></span>
+        <span class="spinner spinner-dark"></span>
+    </div>
+    
+    <!-- Button with loading state -->
+    <div>
+        <h2>Button with Loading State</h2>
+        <button id="demoButton" class="btn" onclick="simulateLoading()">Click to Load</button>
+    </div>
+
+    <script>
+        // JavaScript to demonstrate button loading state
+        function simulateLoading() {
+            const button = document.getElementById('demoButton');
+            const originalText = button.innerHTML;
+            
+            // Show loading state
+            button.classList.add('loading-state');
+            button.innerHTML = 'Loading...';
+            button.disabled = true;
+            
+            // Simulate async operation
+            setTimeout(() => {
+                // Reset button state
+                button.classList.remove('loading-state');
+                button.innerHTML = originalText;
+                button.disabled = false;
+                
+                // Show success message
+                alert('Operation completed!');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
